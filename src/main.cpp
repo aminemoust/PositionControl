@@ -3,6 +3,7 @@
 #include <mbed.h>
 #include "../lib/DigitalEncoderAS5601/DigitalEncoderAS5601.h"
 #include "../lib/PID/PID.h"
+#include "../lib/Motor/Motor.h"
 
 #define TIM_USR TIM7
 #define TIM_USR_IRQ TIM7_IRQn
@@ -21,13 +22,14 @@ void M_TIM_USR_Handler(void){
 }
 
 AnalogIn  pot(PB_1);
-DigitalOut enable1(PC_10);
+/*DigitalOut enable1(PC_10);
 DigitalOut enable2(PC_11);
 DigitalOut enable3(PC_12);
 DigitalOut en_chip(PA_6);
 PwmOut uh_1(PA_8);
 PwmOut vh_2(PA_9);
 PwmOut wh_3(PA_10);
+*/
 Serial pc(USBTX, USBRX, 9600); // tx, rx
 
 DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
@@ -137,19 +139,31 @@ void stepRead()
 
 // }
 
-int main() {
 
+
+int main() {
+    /**
+     * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
+     */
+    PinName coilPins[3] = {PA_8, PA_9, PA_10};
+    Motor::Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
     // put your setup code here, to run once:
     /*uh_1.period(0.0001f);
     vh_2.period(0.0001f);
     wh_3.period(0.0001f);*/
     //float val = 0.0f;
-    uh_1.period(0.0001f);
-    vh_2.period(0.0001f);
-    wh_3.period(0.0001f);
-    en_chip=1;
-    float max = 0.0f;
-    float min = 1024.0f;
+    motor.setPeriodU(0.0001f);
+    motor.setPeriodV(0.0001f);
+    motor.setPeriodW(0.0001f);
+    /*
+    uh_1.period(1/90.0f);// f=90 Hz -> T= 1/f
+    vh_2.period(1/90.0f);
+    wh_3.period(1/90.0f);
+    */
+    motor.setEnableChip(1);
+    //en_chip=1;
+    //float max = 0.0f;
+    //float min = 1024.0f;
     float err;
 
     //Controllore PD (per ora solo P)
@@ -196,7 +210,10 @@ int main() {
             
             stepRead();
             //pc.printf("%.2f\n", angle);
-            switch(step_number){
+
+            motor.setStep(step_number, duty_r, duty_l);
+
+            /*switch(step_number){
                 case 0:
                     uh_1.write(duty_r);
                     vh_2.write(0.0f);
@@ -251,22 +268,15 @@ int main() {
                 enable3 = 0;
                 //step_number=-1;
                 break;
-            }
+            }*/
             //cycle();
             //step_number= (step_number+1) % 6;
             flag=0;
         }
         //wait_ms(500);
-       
-    
-        
-
-
-
+  
     }
-       
-
-    
+  
 }
 
 

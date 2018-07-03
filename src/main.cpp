@@ -1,7 +1,6 @@
 #include <math.h>
 
 #include <mbed.h>
-#include "../lib/DigitalEncoderAS5601/DigitalEncoderAS5601.h"
 #include "../lib/PID/PID.h"
 #include "../lib/Motor/Motor.h"
 
@@ -21,7 +20,7 @@ void M_TIM_USR_Handler(void){
     }
 }
 
-AnalogIn  pot(PB_1);
+//AnalogIn  pot(PB_1);
 /*DigitalOut enable1(PC_10);
 DigitalOut enable2(PC_11);
 DigitalOut enable3(PC_12);
@@ -29,21 +28,26 @@ DigitalOut en_chip(PA_6);
 PwmOut uh_1(PA_8);
 PwmOut vh_2(PA_9);
 PwmOut wh_3(PA_10);
-*/
-Serial pc(USBTX, USBRX, 9600); // tx, rx
 
 DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
 
-float pos_ref = 180.0f;
-float pos_curr;
 //float err;
 //float K_p=0.3f;
-//float K_d = 1.1f;;
+//float K_d = 1.1f;
+*/
+
+
+Serial pc(USBTX, USBRX, 9600); // tx, rx
+
+float pos_ref = 180.0f;
+float pos_curr;
+
 
 float position;
 int step_number=0;
 float duty_r = 0.0f;
 float duty_l = 0.0f;
+
 
 //controllo pd (primo test con solo p)
 void setDutyCycle(float angle){
@@ -146,7 +150,14 @@ int main() {
      * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
-    Motor::Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    Motor::Motor motor;
+
+    try{
+        motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    }catch(std::exception& e){
+        pc.printf("Error: %s\n", e.what());
+    }
+    
     // put your setup code here, to run once:
     /*uh_1.period(0.0001f);
     vh_2.period(0.0001f);
@@ -160,6 +171,7 @@ int main() {
     vh_2.period(1/90.0f);
     wh_3.period(1/90.0f);
     */
+   
     motor.setEnableChip(1);
     //en_chip=1;
     //float max = 0.0f;
@@ -195,7 +207,7 @@ int main() {
             
       
             // Read position from hall sensor's angle divided by electrical poles
-            angle = encoder.getAngleDeg();
+            angle = motor.encoder.getAngleDeg();
             pos_curr = angle;
 
             //Get the error output from the pd controller

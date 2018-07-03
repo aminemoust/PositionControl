@@ -12,13 +12,15 @@ float PID::getOutput(float reference, float value_sens){
 
     float pout = err * k_p;
 
-    integral += err * dt;
+    this->integral += err * dt;
 
-    float iout = integral * k_i;
+    float iout = this->integral * k_i;
 
-    float deriv = (err - prev_err)/dt;
+    float deriv = (err - this->prev_err)/dt;
+
+    this->prev_err = err;
 
     float dout = deriv * k_d;
 
-    return pout + iout + dout;
+    return pout + iout + dout;  //Proportional + Integral + Derivative parts
 }

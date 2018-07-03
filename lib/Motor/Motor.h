@@ -1,5 +1,5 @@
 #include <mbed.h>
-
+#include "../DigitalEncoderAS5601/DigitalEncoderAS5601.h"
 
 #ifndef _Motor_H
 #define _Motor_H
@@ -20,6 +20,8 @@ class Motor{
         void setEnableChip(uint8_t value);
 
         void setStep(uint8_t step_number, float duty_right, float duty_left);
+
+        DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
     private:
         DigitalOut enable1;
         DigitalOut enable2;

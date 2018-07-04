@@ -1,4 +1,5 @@
 #include "Motor.h"
+#include <mbed.h>
 #include <exception>
 
 class WrongSizeException :  public std::exception{
@@ -12,12 +13,14 @@ class WrongSizeException :  public std::exception{
 
 Motor::Motor(){}
 
-Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins = NULL){
+Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins){
     this->enable1 = DigitalOut(en1);
     this->enable2 = DigitalOut(en2);
     this->enable3 = DigitalOut(en3);
 
     this-> en_chip = DigitalOut(en_chip);
+
+    this->encoder = DigitalEncoderAS5601(I2C_SDA,I2C_SCL);
 
     if(sizeof(coilPins) / sizeof(PinName) == 3){    //controlla se coilPins ha 3 valori
         this->uh = PwmOut(coilPins[0]);
@@ -25,7 +28,7 @@ Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* co
         this->wh = PwmOut(coilPins[2]);
 
     }else{
-        throw e;
+        //throw e;
     }
 
     
@@ -107,3 +110,4 @@ void Motor::setPeriodW(float period){
                     break;
             }
  }
+

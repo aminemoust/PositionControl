@@ -2,8 +2,8 @@
 
 
 
-PID::PID(float k_p, float k_i, float k_d, float dt, float max, float min):
-k_p(k_p), k_i(k_i), k_d(k_d), dt(dt), max(max), min(min){}
+PID::PID(float k_p, float k_i, float k_d, float dt):
+k_p(k_p), k_i(k_i), k_d(k_d), dt(dt){}
 
 
 float PID::getOutput(float reference, float value_sens){

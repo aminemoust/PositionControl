@@ -53,12 +53,26 @@ float duty_l = 0.0f;
 void setDutyCycle(float angle){
 
     if(angle >= 0){
-        duty_l=0;
-        duty_r = (float) (angle/360);// + ierr*1.5f)/32000;
-    }else{
         duty_r=0;
-        duty_l = (float) (-angle/360);
+        duty_l = (float) (angle/360);// + ierr*1.5f)/32000;
+    }else{
+        duty_l=0;
+        duty_r = (float) (-angle/360);
     }
+
+    if(duty_l > 1.0f){
+        duty_l = 1.0f;
+    }else if(duty_l < 0.0f){
+        duty_l = 0.0f;
+    }
+
+    if(duty_r > 1.0f){
+        duty_r = 1.0f;
+    }else if(duty_r < 0.0f){
+        duty_r = 0.0f;
+    }
+
+    // pc.printf("%.2f %.2f %.2f\n", pos_curr, duty_r, duty_l);
 }
 
 // void pd(){
@@ -150,22 +164,22 @@ int main() {
      * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
-    Motor::Motor motor;
+    Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
 
-    try{
-        motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);
-    }catch(std::exception& e){
-        pc.printf("Error: %s\n", e.what());
-    }
+    //try{
+        //motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    //}catch(std::exception& e){
+      //  pc.printf("Error: %s\n", e.what());
+   // }
     
     // put your setup code here, to run once:
     /*uh_1.period(0.0001f);
     vh_2.period(0.0001f);
     wh_3.period(0.0001f);*/
     //float val = 0.0f;
-    motor.setPeriodU(0.0001f);
-    motor.setPeriodV(0.0001f);
-    motor.setPeriodW(0.0001f);
+    motor.setPeriodU(0.00001f);
+    motor.setPeriodV(0.00001f);
+    motor.setPeriodW(0.00001f);
     /*
     uh_1.period(1/90.0f);// f=90 Hz -> T= 1/f
     vh_2.period(1/90.0f);
@@ -179,15 +193,15 @@ int main() {
     float err;
 
     //Controllore PD (per ora solo P)
-    PID::PID pd(0.2f, 0, 0, 0.11f, 360.0f, 0.0f);  //k_p, k_i, k_d, dt, max, min
+    PID pd(10.0f, 0.0f, 4.0f, 0.001f);  //k_p, k_i, k_d, dt, max, min
 
     //TIMER INIT
     __HAL_RCC_TIM7_CLK_ENABLE();
 
-    //Freq = 90 Hz
-    mTimUserHandle.Instance = TIM_USR;
-    mTimUserHandle.Init.Prescaler = 10000-1;
-    mTimUserHandle.Init.Period = 100-1;
+    //Freq = 1KHz
+    mTimUserHandle.Instance = TIM_USR;          
+    mTimUserHandle.Init.Prescaler = 9000-1; 
+    mTimUserHandle.Init.Period = 10-1;
     mTimUserHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
     mTimUserHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     HAL_TIM_Base_Init(&mTimUserHandle);
@@ -225,64 +239,7 @@ int main() {
 
             motor.setStep(step_number, duty_r, duty_l);
 
-            /*switch(step_number){
-                case 0:
-                    uh_1.write(duty_r);
-                    vh_2.write(0.0f);
-                    wh_3.write(duty_l);
-                    enable1 = 1;
-                    enable2 = 0;
-                    enable3 = 1;
-                    break;
-
-                case 1:
-                uh_1.write(0.0f);
-                vh_2.write(duty_r);
-                wh_3.write(duty_l);
-                enable1 = 0;
-                enable2 = 1;
-                enable3 = 1;
-                break;
-
-                case 2:
-                uh_1.write(duty_l);
-                vh_2.write(duty_r);
-                wh_3.write(0.0f);
-                enable1 = 1;
-                enable2 = 1;
-                enable3 = 0;
-                break;
-
-                case 3:
-                uh_1.write(duty_l);
-                vh_2.write(0.0f);
-                wh_3.write(duty_r);
-                enable1 = 1;
-                enable2 = 0;
-                enable3 = 1;
-                break;
-
-                case 4:
-                uh_1.write(0.0f);
-                vh_2.write(duty_l);
-                wh_3.write(duty_r);
-                enable1 = 0;
-                enable2 = 1;
-                enable3 = 1;
-                break;
-
-                case 5:
-                uh_1.write(duty_r);
-                vh_2.write(duty_l);
-                wh_3.write(0.0f);
-                enable1 = 1;
-                enable2 = 1;
-                enable3 = 0;
-                //step_number=-1;
-                break;
-            }*/
-            //cycle();
-            //step_number= (step_number+1) % 6;
+            
             flag=0;
         }
         //wait_ms(500);

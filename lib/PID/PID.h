@@ -6,7 +6,7 @@
 
 class PID {
     public:
-        PID(float k_p, float k_i, float k_d, float dt, float max, float min);
+        PID(float k_p, float k_i, float k_d, float dt);
         float getOutput(float reference, float value_sens);
 
     private:
@@ -14,8 +14,6 @@ class PID {
         float k_i;
         float k_d;
         float dt;
-        float max;
-        float min;
         float integral;
         float prev_err=0.0f;
 };

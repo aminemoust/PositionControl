@@ -4,37 +4,44 @@
 #ifndef _Motor_H
 #define _Motor_H
 
-class Motor{
-    public:
-        /*
-            Costruttore con i PinName come parametri, per settare i pin 
-            @param coilPins: array di dim. 3 che contiene i PinName di u,v,w (rispettivamente in questo ordine)
-        */
-        Motor() = default;
-        Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins);
 
-        void setPeriodU(float period);
-        void setPeriodV(float period);
-        void setPeriodW(float period);
+namespace Motor{
 
-        void setEnableChip(uint8_t value);
+    class Motor{
+        public:
+            /*
+                Costruttore con i PinName come parametri, per settare i pin 
+                @param coilPins: array di dim. 3 che contiene i PinName di u,v,w (rispettivamente in questo ordine)
+            */
+            //Motor() = default;
+            Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins = nullptr);
 
-        void setStep(uint8_t step_number, float duty_right, float duty_left);
+            void setPeriodU(float period);
+            void setPeriodV(float period);
+            void setPeriodW(float period);
 
-        DigitalEncoderAS5601 encoder;
+            void setEnableChip(uint8_t value);
 
-    private:
-        DigitalOut enable1;
-        DigitalOut enable2;
-        DigitalOut enable3;
+            void setStep(uint8_t step_number, float duty_right, float duty_left);
 
-        DigitalOut en_chip;
+            DigitalEncoderAS5601 encoder;
 
-        PwmOut uh;
-        PwmOut vh;
-        PwmOut wh;
+        private:
+            DigitalOut _enable1;
+            DigitalOut _enable2;
+            DigitalOut _enable3;
 
-};
+            DigitalOut _en_chip;
+
+            PwmOut _uh;
+            PwmOut _vh;
+            PwmOut _wh;
+
+    };
+
+
+}
+
 
 
 #endif

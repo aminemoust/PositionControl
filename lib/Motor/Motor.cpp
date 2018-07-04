@@ -1,6 +1,5 @@
 #include "Motor.h"
-#include <mbed.h>
-#include <exception>
+#include <exception.h>
 
 class WrongSizeException :  public std::exception{
     virtual const char* what() const throw()
@@ -11,21 +10,21 @@ class WrongSizeException :  public std::exception{
 
 } e;
 
-Motor::Motor(){}
+//Motor::Motor(){}
 
-Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins){
-    this->enable1 = DigitalOut(en1);
-    this->enable2 = DigitalOut(en2);
-    this->enable3 = DigitalOut(en3);
+Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* coilPins = nullptr){
+    _enable1 = DigitalOut(en1);
+    _enable2 = DigitalOut(en2);
+    _enable3 = DigitalOut(en3);
 
-    this-> en_chip = DigitalOut(en_chip);
+    _en_chip = DigitalOut(en_chip);
 
-    this->encoder = DigitalEncoderAS5601(I2C_SDA,I2C_SCL);
+    encoder = DigitalEncoderAS5601(I2C_SDA,I2C_SCL);
 
     if(sizeof(coilPins) / sizeof(PinName) == 3){    //controlla se coilPins ha 3 valori
-        this->uh = PwmOut(coilPins[0]);
-        this->vh = PwmOut(coilPins[1]);
-        this->wh = PwmOut(coilPins[2]);
+        _uh = PwmOut(coilPins[0]);
+        _vh = PwmOut(coilPins[1]);
+        _wh = PwmOut(coilPins[2]);
 
     }else{
         //throw e;
@@ -35,19 +34,19 @@ Motor::Motor(PinName en1, PinName en2, PinName en3, PinName en_chip, PinName* co
 }
 
 void Motor::setPeriodU(float period){
-    this->uh.period(period);
+    _uh.period(period);
 }
 
 void Motor::setPeriodV(float period){
-    this->uh.period(period);
+    _vh.period(period);
 }
 
 void Motor::setPeriodW(float period){
-    this->uh.period(period);
+    _wh.period(period);
 }
 
  void Motor::setEnableChip(uint8_t value){
-     this->en_chip = value;
+     _en_chip = value;
  }
 
 /**
@@ -56,57 +55,57 @@ void Motor::setPeriodW(float period){
  void Motor::setStep(uint8_t step_number, float duty_right, float duty_left){
      switch(step_number){
                 case 0:
-                    this->uh.write(duty_right);
-                    this->vh.write(0.0f);
-                    this->wh.write(duty_left);
-                    this->enable1 = 1;
-                    this->enable2 = 0;
-                    this->enable3 = 1;
+                    _uh.write(duty_right);
+                    _vh.write(0.0f);
+                    _wh.write(duty_left);
+                    _enable1 = 1;
+                    _enable2 = 0;
+                    _enable3 = 1;
                     break;
 
                 case 1:
-                    this->uh.write(0.0f);
-                    this->vh.write(duty_right);
-                    this->wh.write(duty_left);
-                    this->enable1 = 0;
-                    this->enable2 = 1;
-                    this->enable3 = 1;
+                    _uh.write(0.0f);
+                    _vh.write(duty_right);
+                    _wh.write(duty_left);
+                    _enable1 = 0;
+                    _enable2 = 1;
+                    _enable3 = 1;
                     break;
 
                 case 2:
-                    this->uh.write(duty_left);
-                    this->vh.write(duty_right);
-                    this->wh.write(0.0f);
-                    this->enable1 = 1;
-                    this->enable2 = 1;
-                    this->enable3 = 0;
+                    _uh.write(duty_left);
+                    _vh.write(duty_right);
+                    _wh.write(0.0f);
+                    _enable1 = 1;
+                    _enable2 = 1;
+                    _enable3 = 0;
                     break;
 
                 case 3:
-                    this->uh.write(duty_left);
-                    this->vh.write(0.0f);
-                    this->wh.write(duty_right);
-                    this->enable1 = 1;
-                    this->enable2 = 0;
-                    this->enable3 = 1;
+                    _uh.write(duty_left);
+                    _vh.write(0.0f);
+                    _wh.write(duty_right);
+                    _enable1 = 1;
+                    _enable2 = 0;
+                    _enable3 = 1;
                     break;
 
                 case 4:
-                    this->uh.write(0.0f);
-                    this->vh.write(duty_left);
-                    this->wh.write(duty_right);
-                    this->enable1 = 0;
-                    this->enable2 = 1;
-                    this->enable3 = 1;
+                    _uh.write(0.0f);
+                    _vh.write(duty_left);
+                    _wh.write(duty_right);
+                    _enable1 = 0;
+                    _enable2 = 1;
+                    _enable3 = 1;
                     break;
 
                 case 5:
-                    this->uh.write(duty_right);
-                    this->vh.write(duty_left);
-                    this->wh.write(0.0f);
-                    this->enable1 = 1;
-                    this->enable2 = 1;
-                    this->enable3 = 0;
+                    _uh.write(duty_right);
+                    _vh.write(duty_left);
+                    _wh.write(0.0f);
+                    _enable1 = 1;
+                    _enable2 = 1;
+                    _enable3 = 0;
                     break;
             }
  }

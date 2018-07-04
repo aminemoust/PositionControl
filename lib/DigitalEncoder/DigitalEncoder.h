@@ -1,3 +1,5 @@
+
+#define _USE_MATH_DEFINES   // serve per eliminare l'errore in compilazione di M_PI
 #include "math.h"
 
 #ifndef DIGITAL_ENCODER_H

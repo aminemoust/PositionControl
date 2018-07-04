@@ -164,7 +164,7 @@ int main() {
      * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
-    Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    Motor::Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
 
     //try{
         //motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);

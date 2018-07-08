@@ -1,8 +1,8 @@
 #include <math.h>
 
 #include <mbed.h>
-#include "../lib/PID/PID.h"
-#include "../lib/Motor/Motor.h"
+#include "PID.h"    //../lib/PID/
+#include "Motor.h"
 
 #define TIM_USR TIM7
 #define TIM_USR_IRQ TIM7_IRQn
@@ -164,7 +164,7 @@ int main() {
      * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
-    Motor::Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
 
     //try{
         //motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);

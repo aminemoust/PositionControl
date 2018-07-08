@@ -1,6 +1,6 @@
 
-#define _USE_MATH_DEFINES   // serve per eliminare l'errore in compilazione di M_PI
-#include "math.h"
+//#define _USE_MATH_DEFINES   // serve per eliminare l'errore in compilazione di M_PI
+//#include "math.h"
 
 #ifndef DIGITAL_ENCODER_H
 #define DIGITAL_ENCODER_H
@@ -8,6 +8,7 @@
 /**
  *  Abstract class used to implement different types of encoder
  */
+#define M_PI 3.14159265358979323846
 
 enum AngleFormat {angleContinuous = 0, angleMod = 1};
 

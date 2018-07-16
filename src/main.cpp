@@ -9,6 +9,8 @@
 Timer tim;
 
 volatile char flag = 0;
+//float freq = 0.000004f;
+//float delta = 1/freq;
 
 TIM_HandleTypeDef mTimUserHandle;
 
@@ -37,9 +39,9 @@ DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
 */
 
 
-Serial pc(USBTX, USBRX, 9600); // tx, rx
+Serial pc(USBTX, USBRX, 115200); // tx, rx
 
-float pos_ref = 180.0f;
+float pos_ref = 310.0f;
 float pos_curr;
 
 
@@ -52,7 +54,7 @@ float duty_l = 0.0f;
 //controllo pd (primo test con solo p)
 void setDutyCycle(float angle){
 
-    if(angle >= 0){
+    if(angle >= 0.0f){
         duty_r=0;
         duty_l = (float) (angle/360);// + ierr*1.5f)/32000;
     }else{
@@ -72,7 +74,7 @@ void setDutyCycle(float angle){
         duty_r = 0.0f;
     }
 
-    // pc.printf("%.2f %.2f %.2f\n", pos_curr, duty_r, duty_l);
+    //pc.printf("%.2f %.2f %.2f\n", pos_curr, duty_r, duty_l);
 }
 
 // void pd(){
@@ -164,7 +166,7 @@ int main() {
      * Params del costruttore: enable_chip, enable1, enable2, enable3, Array con PinName di u,v,w
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
-    Motor motor(PA_6, PC_10, PC_11, PC_12, coilPins);
+    Motor motor(PC_10, PC_11, PC_12, PA_6, coilPins);
 
     //try{
         //motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);
@@ -191,9 +193,10 @@ int main() {
     //float max = 0.0f;
     //float min = 1024.0f;
     float err;
-
+    float ref;
+    float curr;
     //Controllore PD (per ora solo P)
-    PID pd(10.0f, 0.0f, 4.0f, 0.001f);  //k_p, k_i, k_d, dt, max, min
+    PID pd(10.0f, 0.0f, 0.000004f, 0.001f);  //k_p, k_i, k_d, dt, max, min
 
     //TIMER INIT
     __HAL_RCC_TIM7_CLK_ENABLE();
@@ -225,8 +228,20 @@ int main() {
             pos_curr = angle;
 
             //Get the error output from the pd controller
-            err = pd.getOutput(pos_ref, pos_curr);
-         
+            ref=pos_ref;
+            curr=pos_curr;
+            if(pos_curr>180.0f+pos_ref)
+                curr=curr-360;
+            // if(pos_curr>(180.0f))
+            //     curr=360-curr;
+            // if(pos_curr>ref+180)
+            //      curr=360-curr;
+            
+            
+            
+            
+            err = pd.getOutput(ref, curr); // 
+
             setDutyCycle(err);
             //duty_r = 0.5f;
             //duty_l= 0.0f;
@@ -235,7 +250,7 @@ int main() {
            
             
             stepRead();
-            //pc.printf("%.2f\n", angle);
+            pc.printf("%.2f ,%.2f ,%.2f\n", err,pos_curr,ref-curr);
 
             motor.setStep(step_number, duty_r, duty_l);
 
@@ -250,7 +265,7 @@ int main() {
 
 
 /*
-FREQUENZA 2Hz
+FREQUENZA 1KHz
 MaxFreq (90 * 10^6 Hz)
 Prescaler (100-1)
 Period (200-1)

@@ -2,7 +2,7 @@
 
 #include <mbed.h>
 #include "PID.h"    //../lib/PID/
-#include "Motor.h"
+#include "Motor.h"  //../lib/Motor/
 
 #define TIM_USR TIM7
 #define TIM_USR_IRQ TIM7_IRQn
@@ -22,7 +22,7 @@ void M_TIM_USR_Handler(void){
     }
 }
 
-//AnalogIn  pot(PB_1);
+//AnalogIn  pot(PB_1); trasferito in motor.cpp
 /*DigitalOut enable1(PC_10);
 DigitalOut enable2(PC_11);
 DigitalOut enable3(PC_12);
@@ -39,12 +39,11 @@ DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
 */
 
 
-Serial pc(USBTX, USBRX, 115200); // tx, rx
+//utilizzato in fase di test
+//Serial pc(USBTX, USBRX, 115200); // tx, rx
 
 float pos_ref = 310.0f;
 float pos_curr;
-
-
 float position;
 int step_number=0;
 float duty_r = 0.0f;
@@ -54,7 +53,7 @@ float duty_l = 0.0f;
 //controllo pd (primo test con solo p)
 void setDutyCycle(float angle){
 
-    if(angle >= 0.0f){
+    if(angle >= 0.0f){//in base al segno si determina la direzione del motore
         duty_r=0;
         duty_l = (float) (angle/360);// + ierr*1.5f)/32000;
     }else{
@@ -62,7 +61,7 @@ void setDutyCycle(float angle){
         duty_r = (float) (-angle/360);
     }
 
-    if(duty_l > 1.0f){
+    if(duty_l > 1.0f){ //limiti superiori e inferiori
         duty_l = 1.0f;
     }else if(duty_l < 0.0f){
         duty_l = 0.0f;
@@ -73,11 +72,9 @@ void setDutyCycle(float angle){
     }else if(duty_r < 0.0f){
         duty_r = 0.0f;
     }
-
-    //pc.printf("%.2f %.2f %.2f\n", pos_curr, duty_r, duty_l);
 }
 
-// void pd(){
+// void pd(){ versione vecchia di pid
 //     err = pos_ref - pos_curr;
 
 //     err = err*K_p ;//   + err*K_d;
@@ -93,10 +90,6 @@ void setDutyCycle(float angle){
 //     }
         
 // }
-
-void cycle(){
-    //duty_c = fmod(duty_c+0.1f, 1.0f);
-}
 
 void stepRead()
 {
@@ -193,8 +186,7 @@ int main() {
     //float max = 0.0f;
     //float min = 1024.0f;
     float err;
-    float ref;
-    float curr;
+    float curr;//variabile secondaria per la posizione corrente
     //Controllore PD (per ora solo P)
     PID pd(10.0f, 0.0f, 0.000004f, 0.001f);  //k_p, k_i, k_d, dt, max, min
 
@@ -228,10 +220,12 @@ int main() {
             pos_curr = angle;
 
             //Get the error output from the pd controller
-            ref=pos_ref;
             curr=pos_curr;
-            if(pos_curr>180.0f+pos_ref)
+            if(pos_curr>180.0f+pos_ref/*&& pos_ref<180*/)//inverte il segno per determinare la direzione da prendere
                 curr=curr-360;
+            /*else if(pos_ref=>180 && pos_curr>(180.0f+pos_ref-360))//da testare nel caso ref >180
+                curr=curr-360;
+            */
             // if(pos_curr>(180.0f))
             //     curr=360-curr;
             // if(pos_curr>ref+180)
@@ -240,7 +234,7 @@ int main() {
             
             
             
-            err = pd.getOutput(ref, curr); // 
+            err = pd.getOutput(pos_ref, curr); //pid
 
             setDutyCycle(err);
             //duty_r = 0.5f;

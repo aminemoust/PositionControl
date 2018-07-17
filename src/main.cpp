@@ -9,8 +9,6 @@
 Timer tim;
 
 volatile char flag = 0;
-//float freq = 0.000004f;
-//float delta = 1/freq;
 
 TIM_HandleTypeDef mTimUserHandle;
 
@@ -22,35 +20,17 @@ void M_TIM_USR_Handler(void){
     }
 }
 
-//AnalogIn  pot(PB_1); trasferito in motor.cpp
-/*DigitalOut enable1(PC_10);
-DigitalOut enable2(PC_11);
-DigitalOut enable3(PC_12);
-DigitalOut en_chip(PA_6);
-PwmOut uh_1(PA_8);
-PwmOut vh_2(PA_9);
-PwmOut wh_3(PA_10);
-
-DigitalEncoderAS5601 encoder(I2C_SDA,I2C_SCL);
-
-//float err;
-//float K_p=0.3f;
-//float K_d = 1.1f;
-*/
-
-
 //utilizzato in fase di test
 //Serial pc(USBTX, USBRX, 115200); // tx, rx
 
-float pos_ref = 310.0f;
-float pos_curr;
+float pos_ref = 310.0f;     // posizione di riferimento in input al controllore
+float pos_curr;             // posizione rilevata dal sensore
 float position;
 int step_number=0;
 float duty_r = 0.0f;
 float duty_l = 0.0f;
 
 
-//controllo pd (primo test con solo p)
 void setDutyCycle(float angle){
 
     if(angle >= 0.0f){//in base al segno si determina la direzione del motore
@@ -74,22 +54,6 @@ void setDutyCycle(float angle){
     }
 }
 
-// void pd(){ versione vecchia di pid
-//     err = pos_ref - pos_curr;
-
-//     err = err*K_p ;//   + err*K_d;
-
-
-//     // PI function to obtain duty_cycle
-//     if(err >= 0){
-//         duty_l=0;
-//         duty_c = (float) (err/360);// + ierr*1.5f)/32000;
-//     }else{
-//         duty_c=0;
-//         duty_l = (float) (-err/360);
-//     }
-        
-// }
 
 void stepRead()
 {
@@ -120,39 +84,6 @@ void stepRead()
   }
 }
 
-//Modificare i valori in base al count
-// void stepRead(){
-//     // Check in which of 6 position the motor is
-//   // Check in which of 6 position the motor is
-//   if(position>18.89f && position<=27.29f)
-//   {
-//     step_number=5;
-//   }
-//   if(position>9.69f && position<=18.99f)
-//   {
-//     step_number=4;
-//   }
-//   if(position>1.46f && position<=9.69f)
-//   {
-//     step_number=3;
-//   }
-//   if((position>44.19f && position<=53.0f) || position<=1.46f )
-//   {
-//     step_number=2;
-//   }
-//   if(position>35.19f && position<=44.19f)
-//   {
-//     step_number=1;
-//   }
-//   if(position>27.29f && position<=35.19f)
-//   {
-//     step_number=0;
-//   }
-
-
-// }
-
-
 
 int main() {
     /**
@@ -160,34 +91,18 @@ int main() {
      */
     PinName coilPins[3] = {PA_8, PA_9, PA_10};
     Motor motor(PC_10, PC_11, PC_12, PA_6, coilPins);
-
-    //try{
-        //motor = new Motor(PA_6, PC_10, PC_11, PC_12, coilPins);
-    //}catch(std::exception& e){
-      //  pc.printf("Error: %s\n", e.what());
-   // }
     
-    // put your setup code here, to run once:
-    /*uh_1.period(0.0001f);
-    vh_2.period(0.0001f);
-    wh_3.period(0.0001f);*/
-    //float val = 0.0f;
+   
     motor.setPeriodU(0.00001f);
     motor.setPeriodV(0.00001f);
     motor.setPeriodW(0.00001f);
-    /*
-    uh_1.period(1/90.0f);// f=90 Hz -> T= 1/f
-    vh_2.period(1/90.0f);
-    wh_3.period(1/90.0f);
-    */
    
     motor.setEnableChip(1);
-    //en_chip=1;
-    //float max = 0.0f;
-    //float min = 1024.0f;
+    
     float err;
-    float curr;//variabile secondaria per la posizione corrente
-    //Controllore PD (per ora solo P)
+    float curr; //variabile secondaria per la posizione corrente
+
+    //Controllore PD 
     PID pd(10.0f, 0.0f, 0.000004f, 0.001f);  //k_p, k_i, k_d, dt, max, min
 
     //TIMER INIT
@@ -207,19 +122,15 @@ int main() {
 
     float angle;
 
-    //encoder.setAngleFormat(angleContinuous);
     while(1) {
         if(flag==1){
              // put your main code here, to run repeatedly:
-            //val = pot.read();
-            // Read hall sensor's angle
             
-      
             // Read position from hall sensor's angle divided by electrical poles
             angle = motor.encoder.getAngleDeg();
             pos_curr = angle;
 
-            //Get the error output from the pd controller
+            
             curr=pos_curr;
             if(pos_curr>180.0f+pos_ref/*&& pos_ref<180*/)//inverte il segno per determinare la direzione da prendere
                 curr=curr-360;
@@ -233,18 +144,16 @@ int main() {
             
             
             
-            
-            err = pd.getOutput(pos_ref, curr); //pid
+            //Get the error output from the pd controller
+            err = pd.getOutput(pos_ref, curr); 
 
             setDutyCycle(err);
-            //duty_r = 0.5f;
-            //duty_l= 0.0f;
-            //position = fmod(angle,51.43f); //360/7, where 7 is number of magnets divided by 2, 
+            //360/7, where 7 is number of magnets divided by 2, 
             position = fmod(angle, 51.43f);
            
             
             stepRead();
-            pc.printf("%.2f ,%.2f ,%.2f\n", err,pos_curr,ref-curr);
+            //pc.printf("%.2f ,%.2f ,%.2f\n", err,pos_curr,ref-curr);
 
             motor.setStep(step_number, duty_r, duty_l);
 

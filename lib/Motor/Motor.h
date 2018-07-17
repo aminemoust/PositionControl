@@ -4,6 +4,10 @@
 #ifndef _Motor_H
 #define _Motor_H
 
+/**
+ * Classe che implementa l'algoritmo per pilotare il motore
+ */
+
 
 class Motor{
         public:
